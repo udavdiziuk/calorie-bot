@@ -32,8 +32,6 @@ desktop.ini
 
 # Environment files
 .env
-.env.*
-*.env
 
 # BlueJ files
 *.ctxt
