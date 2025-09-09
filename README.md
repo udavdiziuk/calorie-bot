@@ -14,3 +14,13 @@ Multi-module Spring Boot project that explores a calorie-calculation using photo
 ## Prerequisites
 - JDK 24 installed and on PATH (JAVA_HOME pointing to JDK 24)
 - Maven 3.9+ installed and on PATH
+
+## Running with Docker Compose
+This project provides a docker-compose.yml to run the services together with a Postgres database.
+
+1. Build the project jars:
+   - On Windows PowerShell: `mvn -DskipTests package`
+2. Copy and edit environment variables:
+   - Duplicate `.env.example` to `.env` and provide real values for BOT_NAME and BOT_TOKEN, override ports/DB creds.
+3. Start the stack:
+   - `docker compose up -d --build`
