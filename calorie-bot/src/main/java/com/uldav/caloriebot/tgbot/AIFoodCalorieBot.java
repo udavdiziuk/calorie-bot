@@ -1,5 +1,6 @@
 package com.uldav.caloriebot.tgbot;
 
+import com.uldav.caloriebot.tgbot.util.TelegramBotUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -7,10 +8,11 @@ import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
 import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.api.objects.photo.PhotoSize;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+
+import java.util.List;
 
 
 @Slf4j
@@ -37,20 +39,17 @@ public class AIFoodCalorieBot implements SpringLongPollingBot, LongPollingSingle
 
     @Override
     public void consume(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String messageText = update.getMessage().getText();
-            long chatId = update.getMessage().getChatId();
-
-            SendMessage message = SendMessage
-                    .builder()
-                    .chatId(chatId)
-                    .text(messageText)
-                    .build();
-            try {
-                telegramClient.execute(message);
-            } catch (TelegramApiException e) {
-                log.debug("An exception occurred: {}", e.getMessage());
+        log.info("User Id: {}", update.getMessage().getFrom().getId());
+        if (update.hasCallbackQuery() && update.getMessage().hasPhoto()) {
+            log.debug("Received user photo. Store user info.");
+            List<PhotoSize> photos = update.getMessage().getPhoto();
+            if (photos.size() > 1) {
+                TelegramBotUtils.sendResponse(telegramClient, update.getMessage(), "Please provide only 1 photo");
+            } else {
+                //TODO: food recognition
             }
+        } else {
+            TelegramBotUtils.sendResponse(telegramClient, update.getMessage(), "Unsupported operation.\nPlease provide your food photo instead.");
         }
     }
 }
