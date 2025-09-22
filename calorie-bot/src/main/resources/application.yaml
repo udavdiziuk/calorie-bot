@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: none
   application:
     name: caloriebot
   datasource:
@@ -9,3 +11,6 @@ spring:
     hibernate:
       ddl-auto: update
     database: postgresql
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
