@@ -10,14 +10,7 @@ import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsume
 import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.photo.PhotoSize;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
 
 
 @Slf4j
@@ -48,40 +41,9 @@ public class AIFoodCalorieBot implements SpringLongPollingBot, LongPollingSingle
     public void consume(Update update) {
         log.info("User Id: {}", update.getMessage().getFrom().getId());
         if (update.getMessage().hasPhoto()) {
-            //TODO: move download file logic
-            List<PhotoSize> photos = update.getMessage().getPhoto();
-            // Choose the photo with the highest resolution (usually the last in the list)
-            PhotoSize bestPhoto = photos.getLast();
-            try {
-                // Retrieve file path from Telegram using fileId
-                GetFile getFile = GetFile.builder().fileId(bestPhoto.getFileId()).build();
-                org.telegram.telegrambots.meta.api.objects.File tgFile = telegramClient.execute(getFile);
-                String filePath = tgFile.getFilePath();
-
-                // Log the file path and image format (by extension if available)
-                String imageFormat = "unknown";
-                if (filePath != null) {
-                    int dotIdx = filePath.lastIndexOf('.');
-                    if (dotIdx > -1 && dotIdx < filePath.length() - 1) {
-                        imageFormat = filePath.substring(dotIdx + 1).toLowerCase();
-                    }
-                    log.info("Telegram photo path: {}", filePath);
-                }
-                log.info("Detected image format: {}", imageFormat);
-
-                // Download the file as stream using the resolved path
-                InputStream userPhotoIS = telegramClient.downloadFileAsStream(filePath);
-                byte[] photoBytes = userPhotoIS.readAllBytes();
-
-                String response = openAIService.processRecognitionAndCaloriesCountRequest(photoBytes);
-                TelegramBotUtils.sendResponse(telegramClient, update.getMessage(), response);
-            } catch (TelegramApiException e) {
-                //TODO: exception handling
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                //TODO: exception handling
-                throw new RuntimeException(e);
-            }
+            byte[] photoBytes = TelegramBotUtils.downloadImage(telegramClient, update.getMessage().getPhoto());
+            String response = openAIService.processRecognitionAndCaloriesCountRequest(photoBytes);
+            TelegramBotUtils.sendResponse(telegramClient, update.getMessage(), response);
         } else {
             TelegramBotUtils.sendResponse(telegramClient, update.getMessage(), "Unsupported operation.\nPlease provide your food photo instead.");
         }
