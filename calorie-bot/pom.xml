@@ -15,7 +15,7 @@
     <description>Telegram bot for calories calculation via provided food photo</description>
 
     <properties>
-        <java.version>24</java.version>
+        <java.version>25</java.version>
         <spring-boot.version>3.5.5</spring-boot.version>
         <spring-ai.version>1.0.1</spring-ai.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
