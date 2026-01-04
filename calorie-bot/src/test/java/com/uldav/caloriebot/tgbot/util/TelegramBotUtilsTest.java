@@ -39,10 +39,8 @@ class TelegramBotUtilsTest {
         // Given
         Long chatId = 12345L;
         String text = "Test message";
-        when(message.getChatId()).thenReturn(chatId);
-
         // When
-        TelegramBotUtils.sendResponse(telegramClient, message, text);
+        TelegramBotUtils.sendResponse(telegramClient, chatId, text);
 
         // Then
         verify(telegramClient).execute(any(SendMessage.class));
@@ -52,11 +50,11 @@ class TelegramBotUtilsTest {
     @DisplayName("sendResponse should catch TelegramApiException and log it")
     void sendResponse_ShouldCatchTelegramApiException() throws TelegramApiException {
         // Given
-        when(message.getChatId()).thenReturn(12345L);
+        Long chatId = 12345L;
         when(telegramClient.execute(any(SendMessage.class))).thenThrow(new TelegramApiException("API Error"));
 
         // When & Then
-        assertDoesNotThrow(() -> TelegramBotUtils.sendResponse(telegramClient, message, "text"));
+        assertDoesNotThrow(() -> TelegramBotUtils.sendResponse(telegramClient, chatId, "text"));
         verify(telegramClient).execute(any(SendMessage.class));
     }
 

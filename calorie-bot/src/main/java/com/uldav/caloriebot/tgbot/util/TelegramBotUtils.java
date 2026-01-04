@@ -20,11 +20,10 @@ public class TelegramBotUtils {
     /**
      * Creates generic response from telegram bot with given parameters
      * @param client Telegram client to send message
-     * @param requestMessage chat where to send response
+     * @param chatId chat where to send response
      * @param messageText text of the message
      */
-    public static void sendResponse(TelegramClient client, Message requestMessage, String messageText) {
-        long chatId = requestMessage.getChatId();
+    public static void sendResponse(TelegramClient client, long chatId, String messageText) {
         SendMessage message = SendMessage
                 .builder()
                 .chatId(chatId)
