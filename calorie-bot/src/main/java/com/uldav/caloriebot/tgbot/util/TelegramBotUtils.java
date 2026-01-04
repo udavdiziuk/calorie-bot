@@ -1,6 +1,6 @@
 package com.uldav.caloriebot.tgbot.util;
 
-import com.uldav.caloriebot.exception.BotException;
+import com.uldav.caloriebot.tgbot.exception.BotException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
@@ -17,6 +17,12 @@ import java.util.List;
 @Slf4j
 @UtilityClass
 public class TelegramBotUtils {
+    /**
+     * Creates generic response from telegram bot with given parameters
+     * @param client Telegram client to send message
+     * @param requestMessage chat where to send response
+     * @param messageText text of the message
+     */
     public static void sendResponse(TelegramClient client, Message requestMessage, String messageText) {
         long chatId = requestMessage.getChatId();
         SendMessage message = SendMessage
