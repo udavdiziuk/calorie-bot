@@ -1,10 +1,11 @@
-package com.uldav.caloriebot.tgbot.util;
+package com.uldav.caloriebot.tgbot.handler;
+
 
 import com.uldav.caloriebot.tgbot.exception.BotException;
-import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.photo.PhotoSize;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -14,25 +15,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * Handler for /recognize command from Telegram bot users.
+ * It expects photo provided by users.
+ */
 @Slf4j
-@UtilityClass
-public class TelegramBotUtils {
-    /**
-     * Creates generic response from telegram bot with given parameters
-     * @param client Telegram client to send message
-     * @param chatId chat where to send response
-     * @param messageText text of the message
-     */
-    public static void sendResponse(TelegramClient client, long chatId, String messageText) {
-        SendMessage message = SendMessage
-                .builder()
-                .chatId(chatId)
-                .text(messageText)
-                .build();
-        try {
-            client.execute(message);
-        } catch (TelegramApiException e) {
-            log.debug("An exception occurred: {}", e.getMessage());
+public class RecognizeCommandHandler extends BotCommand implements IBotCommand {
+    public RecognizeCommandHandler() {
+        super("recognize", "recognizes food and sends response with info about calories, fats, proteins, carbs");
+    }
+
+    @Override
+    public String getCommandIdentifier() {
+        return getCommand();
+    }
+
+    @Override
+    public void processMessage(TelegramClient telegramClient, Message message, String[] strings) {
+        log.info("Received message: {}",message.toString());
+        if (message.hasPhoto()) {
+            byte[] photoBytes = downloadImage(telegramClient, message.getPhoto());
+            log.info("Photo size: {}", photoBytes.length);
+            //TODO: Send event with receieved data
         }
     }
 
@@ -44,7 +48,7 @@ public class TelegramBotUtils {
      * @param photos the list of photo sizes from the bot message
      * @return a byte array containing the downloaded photo
      */
-    public static byte[] downloadImage(TelegramClient telegramClient, List<PhotoSize> photos) {
+    private byte[] downloadImage(TelegramClient telegramClient, List<PhotoSize> photos) {
         // Choose the photo with the highest resolution (usually the last in the list)
         PhotoSize bestPhoto = photos.getLast();
         try {
