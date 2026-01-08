@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.photo.PhotoSize;
@@ -24,6 +25,7 @@ public class RecognizeCommandService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    @Transactional
     public void handleRecognizeCommand(TelegramClient telegramClient, Message message) {
         if (message.hasPhoto()) {
             byte[] photoBytes = downloadImage(telegramClient, message.getPhoto());

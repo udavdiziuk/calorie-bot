@@ -1,7 +1,7 @@
-package com.uldav.caloriebot.foodrecognition.openai;
+package com.uldav.caloriebot.foodrecognition.adapter.openai;
 
 import com.uldav.caloriebot.foodrecognition.RecognitionAndAnalysesReady;
-import com.uldav.caloriebot.foodrecognition.api.RecognitionAndCaloriesApi;
+import com.uldav.caloriebot.foodrecognition.adapter.RecognitionAdapter;
 import com.uldav.caloriebot.foodrecognition.PhotoForRecognitionReceived;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,24 +10,22 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.content.Media;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
 
 @AllArgsConstructor
 @Service
 @Slf4j
-public class OpenAIService implements RecognitionAndCaloriesApi {
-    private static final String usermessage = "По изображению ниже распознай продукты питания по их количеству. Также предоставь количество калорий и БЖУ";
+public class OpenAIService implements RecognitionAdapter {
+    private static final String USER_MESSAGE = "По изображению ниже распознай продукты питания по их количеству. Также предоставь количество калорий и БЖУ";
     private final ChatClient chatClient;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    @ApplicationModuleListener
     @Override
     public void processRecognitionAndCaloriesCountRequest(PhotoForRecognitionReceived photo) {
         log.info("Start processing recognition and calories count using OpenAI API");
         UserMessage userMessage = UserMessage.builder()
-                .text(usermessage)
+                .text(USER_MESSAGE)
                 .media(Media.builder().mimeType(MimeTypeUtils.IMAGE_JPEG).data(photo.getPhoto()).build())
                 .build();
 
