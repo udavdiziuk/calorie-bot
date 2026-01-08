@@ -1,7 +1,7 @@
-package com.uldav.caloriebot.ai.api;
+package com.uldav.caloriebot.foodrecognition.api;
 
 
-import com.uldav.caloriebot.event.PhotoForRecognitionReceived;
+import com.uldav.caloriebot.foodrecognition.PhotoForRecognitionReceived;
 
 /**
  * Responsible for food recognition and calories count.

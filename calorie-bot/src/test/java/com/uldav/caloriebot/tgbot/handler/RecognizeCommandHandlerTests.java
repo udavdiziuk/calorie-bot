@@ -1,6 +1,7 @@
 package com.uldav.caloriebot.tgbot.handler;
 
 import com.uldav.caloriebot.tgbot.exception.BotException;
+import com.uldav.caloriebot.tgbot.service.RecognizeCommandService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class RecognizeCommandHandlerTests {
+class RecognizeCommandHandlerTests {
     @Mock
     private TelegramClient telegramClient;
 
@@ -33,7 +34,7 @@ public class RecognizeCommandHandlerTests {
     private Message message;
 
     @InjectMocks
-    private RecognizeCommandHandler recognizeCommandHandler;
+    private RecognizeCommandService recognizeCommandService;
 
     @Test
     @DisplayName("downloadImage should throw BotException when TelegramApiException occurs during GetFile")
@@ -49,7 +50,7 @@ public class RecognizeCommandHandlerTests {
         when(telegramClient.execute(any(GetFile.class))).thenThrow(new TelegramApiException("API Error"));
 
         // When & Then
-        BotException exception = assertThrows(BotException.class, () -> recognizeCommandHandler.processMessage(telegramClient, message, new String[]{}));
+        BotException exception = assertThrows(BotException.class, () -> recognizeCommandService.handleRecognizeCommand(telegramClient, message));
         assertEquals("API Error", exception.getMessage());
     }
 
@@ -72,7 +73,7 @@ public class RecognizeCommandHandlerTests {
         when(telegramClient.downloadFileAsStream("path/to/image.jpg")).thenReturn(inputStream);
 
         // When & Then
-        BotException exception = assertThrows(BotException.class, () -> recognizeCommandHandler.processMessage(telegramClient, message, new String[]{}));
+        BotException exception = assertThrows(BotException.class, () -> recognizeCommandService.handleRecognizeCommand(telegramClient, message));
         assertEquals("Read Error", exception.getMessage());
     }
 }

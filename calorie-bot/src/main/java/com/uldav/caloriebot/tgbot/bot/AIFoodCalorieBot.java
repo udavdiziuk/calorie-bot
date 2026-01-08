@@ -22,9 +22,18 @@ import java.util.List;
 @Slf4j
 @Component
 public class AIFoodCalorieBot extends CommandLongPollingTelegramBot {
-    public AIFoodCalorieBot(TelegramClient telegramClient, @Value("${BOT_NAME}") String botName) {
+
+    private final NonCommandHandler nonCommandHandler;
+    private final UnknownCommandHandler unknownCommandHandler;
+
+    public AIFoodCalorieBot(TelegramClient telegramClient, @Value("${BOT_NAME}") String botName,
+                            NonCommandHandler nonCommandHandler, UnknownCommandHandler unknownCommandHandler) {
         super(telegramClient, true, () -> botName);
+        //command handlers
+        this.nonCommandHandler = nonCommandHandler;
+        this.unknownCommandHandler = unknownCommandHandler;
         this.registerAll(new RecognizeCommandHandler());
+
         this.setMenuButton();
         log.info("Created AIFoodCalorieBot");
     }
@@ -32,13 +41,13 @@ public class AIFoodCalorieBot extends CommandLongPollingTelegramBot {
     @Override
     public void processNonCommandUpdate(Update update) {
         log.info("Received non command update: {}", update);
-        NonCommandHandler.handleNonCommand(telegramClient, update.getMessage());
+        nonCommandHandler.handleNonCommand(telegramClient, update.getMessage());
     }
 
     @Override
     public void processInvalidCommandUpdate(Update update) {
         log.info("Received invalid command update: {}", update);
-        UnknownCommandHandler.handleUnknownCommand(telegramClient, update.getMessage());
+        unknownCommandHandler.handleUnknownCommand(telegramClient, update.getMessage());
     }
 
     @Override

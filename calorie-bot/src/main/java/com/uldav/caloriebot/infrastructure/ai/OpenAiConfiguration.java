@@ -1,4 +1,4 @@
-package com.uldav.caloriebot.ai.configuration;
+package com.uldav.caloriebot.infrastructure.ai;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;

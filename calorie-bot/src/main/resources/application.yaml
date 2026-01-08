@@ -18,6 +18,12 @@ spring:
         options:
           model: gpt-5
           temperature: 1
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: true
+      republish-outstanding-events-on-restart: true
 logging:
   level:
     org.springframework.ai.chat.client: DEBUG
