@@ -65,3 +65,7 @@ replay_pid*
 
 # Logs directory
 logs/
+
+# Claude Code
+CLAUDE.md
+.claude
