@@ -167,7 +167,7 @@ class OpenAIServiceTest {
             assertTrue(message.contains("🥩 Белки: 0,4 г") || message.contains("🥩 Белки: 0.4 г"));
             assertTrue(message.contains("🍞 Углеводы: 20,5 г") || message.contains("🍞 Углеводы: 20.5 г"));
             assertTrue(message.contains("🧈 Жиры: 0,3 г") || message.contains("🧈 Жиры: 0.3 г"));
-            assertTrue(message.contains("_Уверенность: 85%_"));
+            assertTrue(message.contains("_Точность: 85%_"));
         }
     }
 
