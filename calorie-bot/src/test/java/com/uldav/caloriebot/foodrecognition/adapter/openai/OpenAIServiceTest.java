@@ -184,6 +184,21 @@ class OpenAIServiceTest {
 
             assertTrue(message.contains("Fish\\_\\[salad]\\*\\`chef\\` \\\\ special"));
         }
+
+        @Test
+        @DisplayName("Should show placeholders when model omits nutrition fields")
+        void formatResultMessage_MissingNutritionFields_ReturnsPlaceholders() {
+            RecognitionResult result = new RecognitionResult();
+            result.setGeneralRecognitionInfo("Яблоко");
+            result.setConfidence(85);
+
+            String message = openAIService.formatResultMessage(result);
+
+            assertTrue(message.contains("🔥 Калории: N/A"));
+            assertTrue(message.contains("🥩 Белки: N/A"));
+            assertTrue(message.contains("🍞 Углеводы: N/A"));
+            assertTrue(message.contains("🧈 Жиры: N/A"));
+        }
     }
 
     @Nested
@@ -236,6 +251,37 @@ class OpenAIServiceTest {
                     () -> openAIService.processRecognitionAndCaloriesCountRequest(photo));
 
             verify(applicationEventPublisher, never()).publishEvent(any());
+        }
+
+        @Test
+        @DisplayName("Should publish event when ChatGPT omits nutrition fields")
+        void processRecognition_MissingNutritionFields_PublishesEvent() {
+            byte[] photoBytes = new byte[]{1, 2, 3};
+            long chatId = 12345L;
+            PhotoForRecognitionReceived photo = new PhotoForRecognitionReceived(photoBytes, chatId);
+            String partialJson = """
+                    {
+                        "generalRecognitionInfo": "Яблоко",
+                        "confidence": 85
+                    }
+                    """;
+
+            ChatClient.CallResponseSpec callResponseSpec = mock(ChatClient.CallResponseSpec.class);
+            ChatClient.ChatClientRequestSpec requestSpec = mock(ChatClient.ChatClientRequestSpec.class);
+            when(chatClient.prompt(any(Prompt.class))).thenReturn(requestSpec);
+            when(requestSpec.call()).thenReturn(callResponseSpec);
+            when(callResponseSpec.content()).thenReturn(partialJson);
+
+            openAIService.processRecognitionAndCaloriesCountRequest(photo);
+
+            ArgumentCaptor<RecognitionAndAnalysesReady> eventCaptor =
+                    ArgumentCaptor.forClass(RecognitionAndAnalysesReady.class);
+            verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+
+            RecognitionAndAnalysesReady event = eventCaptor.getValue();
+            assertEquals(chatId, event.getChatId());
+            assertTrue(event.getMessage().contains("🔥 Калории: N/A"));
+            assertTrue(event.getMessage().contains("🥩 Белки: N/A"));
         }
     }
 }

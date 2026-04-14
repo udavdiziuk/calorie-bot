@@ -27,6 +27,7 @@ import org.springframework.util.MimeTypeUtils;
 @Service
 @Slf4j
 public class OpenAIService implements RecognitionAdapter {
+    private static final String UNKNOWN_VALUE = "N/A";
     private static final String USER_MESSAGE = "По изображению ниже распознай продукты питания по их количеству. Также предоставь количество калорий и БЖУ";
     private final ChatClient chatClient;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -100,18 +101,26 @@ public class OpenAIService implements RecognitionAdapter {
                 *Распознанный продукт:* %s
 
                 *Пищевая ценность:*
-                🔥 Калории: %d ккал
-                🥩 Белки: %.1f г
-                🍞 Углеводы: %.1f г
-                🧈 Жиры: %.1f г
+                🔥 Калории: %s
+                🥩 Белки: %s
+                🍞 Углеводы: %s
+                🧈 Жиры: %s
 
                 _Точность: %d%%_""",
                 escapeMarkdown(result.getGeneralRecognitionInfo()),
-                result.getCalories(),
-                result.getProtein(),
-                result.getCarbs(),
-                result.getFats(),
+                formatCalories(result.getCalories()),
+                formatGrams(result.getProtein()),
+                formatGrams(result.getCarbs()),
+                formatGrams(result.getFats()),
                 result.getConfidence());
+    }
+
+    private String formatCalories(Integer calories) {
+        return calories == null ? UNKNOWN_VALUE : calories + " ккал";
+    }
+
+    private String formatGrams(Double value) {
+        return value == null ? UNKNOWN_VALUE : String.format("%.1f г", value);
     }
 
     private String escapeMarkdown(String text) {
