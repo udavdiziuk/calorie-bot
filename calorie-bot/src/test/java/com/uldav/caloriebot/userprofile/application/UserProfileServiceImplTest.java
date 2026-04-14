@@ -46,7 +46,7 @@ class UserProfileServiceImplTest {
             UserProfile existing = buildProfile(telegramUserId, "john");
             UserProfileDto expectedDto = buildDto(telegramUserId, "john");
 
-            when(repository.findByTelegramUserIdAndDeletedFalse(telegramUserId)).thenReturn(Optional.of(existing));
+            when(repository.findByTelegramUserId(telegramUserId)).thenReturn(Optional.of(existing));
             when(mapper.toDto(existing)).thenReturn(expectedDto);
 
             UserProfileDto result = service.getOrCreateProfile(expectedDto);
@@ -65,7 +65,7 @@ class UserProfileServiceImplTest {
             savedEntity.setId(1L);
             UserProfileDto resultDto = buildDto(telegramUserId, "jane");
 
-            when(repository.findByTelegramUserIdAndDeletedFalse(telegramUserId)).thenReturn(Optional.empty());
+            when(repository.findByTelegramUserId(telegramUserId)).thenReturn(Optional.empty());
             when(mapper.toEntity(inputDto)).thenReturn(newEntity);
             when(repository.save(newEntity)).thenReturn(savedEntity);
             when(mapper.toDto(savedEntity)).thenReturn(resultDto);
@@ -85,7 +85,7 @@ class UserProfileServiceImplTest {
             UserProfile existing = buildProfile(telegramUserId, "bob");
             UserProfileDto dto = buildDto(telegramUserId, "bob");
 
-            when(repository.findByTelegramUserIdAndDeletedFalse(telegramUserId)).thenReturn(Optional.of(existing));
+            when(repository.findByTelegramUserId(telegramUserId)).thenReturn(Optional.of(existing));
             when(mapper.toDto(existing)).thenReturn(dto);
 
             UserProfileDto first = service.getOrCreateProfile(dto);
@@ -93,6 +93,30 @@ class UserProfileServiceImplTest {
 
             assertEquals(first, second);
             verify(repository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should restore soft-deleted profile instead of creating duplicate")
+        void restoresSoftDeletedProfile() {
+            long telegramUserId = 321L;
+            UserProfile deletedProfile = buildProfile(telegramUserId, "old_name");
+            deletedProfile.setDeleted(true);
+            LocalDateTime originalCreatedAt = deletedProfile.getCreatedAt();
+            UserProfileDto inputDto = buildDto(telegramUserId, "new_name");
+            UserProfileDto restoredDto = buildDto(telegramUserId, "new_name");
+
+            when(repository.findByTelegramUserId(telegramUserId)).thenReturn(Optional.of(deletedProfile));
+            when(repository.save(deletedProfile)).thenReturn(deletedProfile);
+            when(mapper.toDto(deletedProfile)).thenReturn(restoredDto);
+
+            UserProfileDto result = service.getOrCreateProfile(inputDto);
+
+            assertEquals(restoredDto, result);
+            assertFalse(deletedProfile.isDeleted());
+            assertEquals(originalCreatedAt, deletedProfile.getCreatedAt());
+            assertNotNull(deletedProfile.getUpdatedAt());
+            verify(mapper).updateEntityFromDto(inputDto, deletedProfile);
+            verify(repository).save(deletedProfile);
         }
     }
 

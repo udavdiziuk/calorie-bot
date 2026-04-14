@@ -26,8 +26,8 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     @Transactional
     public UserProfileDto getOrCreateProfile(UserProfileDto profileData) {
-        return repository.findByTelegramUserIdAndDeletedFalse(profileData.getTelegramUserId())
-                .map(mapper::toDto)
+        return repository.findByTelegramUserId(profileData.getTelegramUserId())
+                .map(existing -> restoreDeletedProfile(existing, profileData))
                 .orElseGet(() -> {
                     UserProfile profile = mapper.toEntity(profileData);
                     LocalDateTime now = LocalDateTime.now();
@@ -66,5 +66,19 @@ public class UserProfileServiceImpl implements UserProfileService {
                     profile.setUpdatedAt(LocalDateTime.now());
                     repository.save(profile);
                 });
+    }
+
+    private UserProfileDto restoreDeletedProfile(UserProfile existing, UserProfileDto profileData) {
+        if (!existing.isDeleted()) {
+            return mapper.toDto(existing);
+        }
+
+        mapper.updateEntityFromDto(profileData, existing);
+        existing.setDeleted(false);
+        if (existing.getCreatedAt() == null) {
+            existing.setCreatedAt(LocalDateTime.now());
+        }
+        existing.setUpdatedAt(LocalDateTime.now());
+        return mapper.toDto(repository.save(existing));
     }
 }

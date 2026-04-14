@@ -10,5 +10,7 @@ import java.util.Optional;
  */
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
 
+    Optional<UserProfile> findByTelegramUserId(long telegramUserId);
+
     Optional<UserProfile> findByTelegramUserIdAndDeletedFalse(long telegramUserId);
 }
