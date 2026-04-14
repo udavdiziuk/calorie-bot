@@ -106,11 +106,24 @@ public class OpenAIService implements RecognitionAdapter {
                 🧈 Жиры: %.1f г
 
                 _Точность: %d%%_""",
-                result.getGeneralRecognitionInfo(),
+                escapeMarkdown(result.getGeneralRecognitionInfo()),
                 result.getCalories(),
                 result.getProtein(),
                 result.getCarbs(),
                 result.getFats(),
                 result.getConfidence());
+    }
+
+    private String escapeMarkdown(String text) {
+        if (text == null) {
+            return null;
+        }
+
+        return text
+                .replace("\\", "\\\\")
+                .replace("_", "\\_")
+                .replace("*", "\\*")
+                .replace("`", "\\`")
+                .replace("[", "\\[");
     }
 }

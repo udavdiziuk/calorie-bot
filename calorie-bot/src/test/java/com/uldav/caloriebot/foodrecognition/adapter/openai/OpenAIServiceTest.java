@@ -169,6 +169,21 @@ class OpenAIServiceTest {
             assertTrue(message.contains("🧈 Жиры: 0,3 г") || message.contains("🧈 Жиры: 0.3 г"));
             assertTrue(message.contains("_Точность: 85%_"));
         }
+        @Test
+        @DisplayName("Should escape Telegram Markdown control characters in model text")
+        void formatResultMessage_EscapesMarkdownCharacters() {
+            RecognitionResult result = new RecognitionResult();
+            result.setGeneralRecognitionInfo("Fish_[salad]*`chef` \\ special");
+            result.setCalories(78);
+            result.setProtein(0.4);
+            result.setCarbs(20.5);
+            result.setFats(0.3);
+            result.setConfidence(85);
+
+            String message = openAIService.formatResultMessage(result);
+
+            assertTrue(message.contains("Fish\\_\\[salad]\\*\\`chef\\` \\\\ special"));
+        }
     }
 
     @Nested
